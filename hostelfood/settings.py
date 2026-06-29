@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-!tudb)(xe^-b5r##=ul&g13e@3xt*ebnnov9!!j77fex3va-f#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'hostelfood.urls'
@@ -122,6 +123,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [STATIC_DIR]
 LOGIN_REDIRECT_URL = '/feedback/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
