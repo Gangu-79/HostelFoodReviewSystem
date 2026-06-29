@@ -1,0 +1,267 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Food Reviews & Ratings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'feedback' %}">
+            🍽️ Hostel Food Reviews
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="navbar-text d-none d-sm-inline">
+                Welcome, <strong>{{ request.user.username }}</strong>
+                {% if request.user.is_superuser %}
+                    <span class="badge bg-danger text-uppercase ms-1" style="font-size: 0.65rem;">Admin</span>
+                {% elif request.user.profile.role == 'faculty' %}
+                    <span class="badge bg-secondary text-uppercase ms-1" style="font-size: 0.65rem;">Faculty</span>
+                {% else %}
+                    <span class="badge bg-info text-uppercase ms-1" style="font-size: 0.65rem;">Student</span>
+                {% endif %}
+            </span>
+            <form action="/accounts/logout/" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn-custom-danger border-0">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container fade-in-up">
+    <!-- MESSAGES ALERT -->
+    {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- TODAY'S MENU -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4 font-weight-bold">Today's Hostel Menu</h2>
+        </div>
+        
+        <!-- Breakfast Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card-food">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836" class="card-img-top" alt="Breakfast">
+                    <span class="meal-badge badge-breakfast">Breakfast</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Morning Feast</h5>
+                    <p class="card-text">Idli, Soft Dosa, Coconut & Tomato Chutney, Sambhar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lunch Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card-food">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" class="card-img-top" alt="Lunch">
+                    <span class="meal-badge badge-lunch">Lunch</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Hearty Lunch</h5>
+                    <p class="card-text">Steamed Rice, Flavorful Dal, Seasonal Vegetable Curry, Papad.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dinner Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card-food">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd" class="card-img-top" alt="Dinner">
+                    <span class="meal-badge badge-dinner">Dinner</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Satisfying Dinner</h5>
+                    <p class="card-text">Hot Wheat Chapati, Special Curry, Curd Rice, Pickle.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD & FEEDBACK SECTION -->
+    <div class="row">
+        <!-- LEFT COLUMN: RATING STATS & SUBMISSION FORM -->
+        <div class="col-lg-4 mb-4">
+            <!-- Meal Rating Stats Widget -->
+            <div class="panel-card mb-4">
+                <div class="panel-header">
+                    <h3>📊 Menu Ratings Stats</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="stats-card stats-breakfast">
+                                <div class="stats-title">Breakfast</div>
+                                <div class="stats-value">{{ stats.Breakfast }}</div>
+                                <div class="stats-stars">
+                                    {% if stats.Breakfast >= 4.5 %}
+                                        ★★★★★
+                                    {% elif stats.Breakfast >= 3.5 %}
+                                        ★★★★☆
+                                    {% elif stats.Breakfast >= 2.5 %}
+                                        ★★★☆☆
+                                    {% elif stats.Breakfast >= 1.5 %}
+                                        ★★☆☆☆
+                                    {% elif stats.Breakfast > 0 %}
+                                        ★☆☆☆☆
+                                    {% else %}
+                                        ☆☆☆☆☆ (No Ratings)
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="stats-card stats-lunch">
+                                <div class="stats-title">Lunch</div>
+                                <div class="stats-value">{{ stats.Lunch }}</div>
+                                <div class="stats-stars">
+                                    {% if stats.Lunch >= 4.5 %}
+                                        ★★★★★
+                                    {% elif stats.Lunch >= 3.5 %}
+                                        ★★★★☆
+                                    {% elif stats.Lunch >= 2.5 %}
+                                        ★★★☆☆
+                                    {% elif stats.Lunch >= 1.5 %}
+                                        ★★☆☆☆
+                                    {% elif stats.Lunch > 0 %}
+                                        ★☆☆☆☆
+                                    {% else %}
+                                        ☆☆☆☆☆ (No Ratings)
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="stats-card stats-dinner">
+                                <div class="stats-title">Dinner</div>
+                                <div class="stats-value">{{ stats.Dinner }}</div>
+                                <div class="stats-stars">
+                                    {% if stats.Dinner >= 4.5 %}
+                                        ★★★★★
+                                    {% elif stats.Dinner >= 3.5 %}
+                                        ★★★★☆
+                                    {% elif stats.Dinner >= 2.5 %}
+                                        ★★★☆☆
+                                    {% elif stats.Dinner >= 1.5 %}
+                                        ★★☆☆☆
+                                    {% elif stats.Dinner > 0 %}
+                                        ★☆☆☆☆
+                                    {% else %}
+                                        ☆☆☆☆☆ (No Ratings)
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Feedback Form -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3>✍️ Rate Today's Food</h3>
+                </div>
+                <div class="panel-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group-custom">
+                            <label for="{{ form.food_item.id_for_label }}">Select Meal</label>
+                            {{ form.food_item }}
+                            {{ form.food_item.errors }}
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label for="{{ form.rating.id_for_label }}">Rating</label>
+                            {{ form.rating }}
+                            {{ form.rating.errors }}
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label for="{{ form.comment.id_for_label }}">Comments / Suggestions</label>
+                            {{ form.comment }}
+                            {{ form.comment.errors }}
+                        </div>
+
+                        <button class="btn-custom-primary w-100 mt-2" type="submit">
+                            Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: COMMUNITY REVIEWS LIST -->
+        <div class="col-lg-8">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3>💬 Student Reviews & Comments</h3>
+                </div>
+                <div class="panel-body p-0">
+                    {% if feedbacks %}
+                        <div class="reviews-container">
+                            {% for fb in feedbacks %}
+                                <div class="review-item">
+                                    <div class="review-meta">
+                                        <div class="review-user-meal">
+                                            <span class="review-username">{{ fb.user.username }}</span>
+                                            {% if fb.user_role == 'Faculty' %}
+                                                <span class="badge bg-secondary text-uppercase" style="font-size: 0.65rem; font-weight: 600;">Faculty</span>
+                                            {% elif fb.user_role == 'Admin' %}
+                                                <span class="badge bg-danger text-uppercase" style="font-size: 0.65rem; font-weight: 600;">Admin</span>
+                                            {% else %}
+                                                <span class="badge bg-info text-uppercase" style="font-size: 0.65rem; font-weight: 600;">Student</span>
+                                            {% endif %}
+                                            <span class="review-meal-tag {% if fb.food_item == 'Breakfast' %}badge-breakfast{% elif fb.food_item == 'Lunch' %}badge-lunch{% else %}badge-dinner{% endif %}">
+                                                {{ fb.food_item }}
+                                            </span>
+                                        </div>
+                                        <div class="review-rating" title="Rating: {{ fb.rating }}/5">
+                                            {{ fb.rating_stars }}
+                                        </div>
+                                    </div>
+                                    <p class="review-comment">"{{ fb.comment }}"</p>
+                                    <div class="review-date text-end">
+                                        {{ fb.created_at|date:"M d, Y - h:i A" }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-5 text-center text-muted">
+                            <p class="fs-4 mb-2">🍽️ No Reviews Yet</p>
+                            <p class="small">Be the first student to review today's food by filling out the form on the left!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
